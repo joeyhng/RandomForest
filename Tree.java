@@ -21,15 +21,20 @@ public class Tree{
         }
 
         int[] selectedFeatures = data.featureRandomSubset(subsetSize);
-        double maxScore = 0; 
+        double maxScore = -1e30; 
         int bestFeat = -1;
         for (int f = 0; f < selectedFeatures.length; f++){
             int feat = selectedFeatures[f];
             double score = data.computeScore(feat);
-            if (bestFeat == -1 || maxScore < score){
+            if (bestFeat == -1 || maxScore > score){
                 bestFeat = feat;
                 maxScore = score;
             }
+        }
+//        System.out.println("max score = " + maxScore);
+
+        if (maxScore <= 0){
+            return new Leaf(data.getMajority());
         }
 
         DataPair dataSplit = data.split(bestFeat);
@@ -40,7 +45,8 @@ public class Tree{
         Node leftNode = train_helper(dataSplit.left(), depth+1);
         Node rightNode = train_helper(dataSplit.right(), depth+1);
         Node res = new InnerNode(bestFeat, leftNode, rightNode);
-//        System.out.println(leftNode.getClass().getName() + " " + rightNode.getClass().getName());
+        if (leftNode.getClass().getName().equals("InnerNode"))
+            System.out.println(leftNode.getClass().getName() + " " + rightNode.getClass().getName());
         return res;
     }
 

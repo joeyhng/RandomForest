@@ -7,9 +7,8 @@ import java.util.TreeMap;
 public class Data {
 
     private int numExamples;
+    private int numPositive;
 
-//    private int[] id;
-//    private int[] labels;
     private TreeMap<Integer, int[]> data;     // map (feature id) -> (list of example id)
     private TreeMap<Integer, Integer> labels; // map (example id) -> (0/1 label)
 
@@ -17,6 +16,8 @@ public class Data {
         this.data = data;
         this.labels = labels;
         this.numExamples = labels.size();
+        for (Integer label : labels.values())
+            numPositive += (label.intValue() == 1) ? 1 : 0;
     }
 
     public int getMajority(){
@@ -37,18 +38,38 @@ public class Data {
         return a;
     }
 
+    private double entropy(double x,double y){
+        double p = x / y;
+        return -(p * Math.log(p) + (1-p) * Math.log(1-p));
+    }
+
+    private double gini(double x,double y){
+        double p = x / y;
+        return p * (1-p);
+    }
+
+
     // TODO information gain
+    // Gini index used now
     public double computeScore(int feat){
-        int cnt = 0;
         int[] examples = data.get(new Integer(feat));
-        if (examples != null){
-            for (int i=0; i < examples.length; i++){
-                cnt += (labels.get(examples[i]).intValue() == 1) ? 1 : 0;
-            }
-//            if (cnt != 0)
-//                System.out.println("cnt = " + cnt);
+        if (examples == null)
+            return -1e30;
+
+        int cnt = 0;
+        for (int i=0; i<examples.length; i++){
+            cnt += (labels.get(examples[i]).intValue() == 1) ? 1 : 0;
         }
-        return Math.abs(numExamples/2 - cnt);
+        if (numExamples == examples.length)
+            return -1e30;
+        double g = ((double)examples.length / numExamples * gini(cnt, examples.length) + 
+                (double)(numExamples - examples.length) / numExamples * gini(numPositive - cnt, numExamples - examples.length));
+        /*
+        if (g!=g){
+            System.out.printf("%f %f %f %f %f %d/%d\n", g , (double)examples.length / numExamples , gini(cnt, examples.length) , (double)(numExamples - examples.length) , numExamples * gini(numPositive - cnt, numExamples - examples.length), numExamples, examples.length);
+        }
+        */
+        return g;
     }
 
     public DataPair split(int feat){
@@ -61,24 +82,6 @@ public class Data {
             index.add( examples[i] );
         }
 
-        /*
-        int[] leftLabels = new int[index.size()];
-        int[] rightLabels = new int[numExamples - index.size()];
-        int[] leftID = new int[index.size()];
-        int[] rightID = new int[numExamples - index.size()];
-        int nLeft = 0, nRight = 0;
-        for (int i=0; i < numExamples; i++){
-            if (index.contains(id[i])){
-                leftID[nLeft] = id[i];
-                leftLabels[nLeft++] = labels[i];
-            }else{
-                rightID[nRight] = id[i];
-                rightLabels[nRight++] = labels[i];
-            }
-        }
-        assert nLeft == index.size();
-        assert nRight == numExamples - index.size();
-        */
         TreeMap<Integer, Integer> leftLabels = new TreeMap<Integer,Integer>();
         TreeMap<Integer, Integer> rightLabels = new TreeMap<Integer,Integer>();
         for (Map.Entry<Integer,Integer> entry : labels.entrySet()){
@@ -108,11 +111,9 @@ public class Data {
             if (rightList.size() > 0)
                 rightMap.put(entry.getKey(), toIntArray(rightList));
         }
-//        Data leftData = new Data(leftID, leftMap, leftLabels);
-//        Data rightData = new Data(rightID, rightMap, rightLabels);
         Data leftData = new Data(leftLabels, leftMap);
         Data rightData = new Data(rightLabels, rightMap);
-        System.out.println("split = " + leftData.getNumExamples() + " " + rightData.getNumExamples());
+//        System.out.printf("split = %d(%d) | %d(%d)\n" , leftData.getNumExamples(), leftData.getMajority(), rightData.getNumExamples(), rightData.getMajority());
         return new DataPair(leftData, rightData);
     }
 
@@ -125,6 +126,12 @@ public class Data {
     }
 
     public boolean monotone(){
+        int x = 0;
+        for (Integer label : labels.values())
+            x += label.intValue();
+        if (x>=0)
+        return x==0 || x==labels.size();
+
         Integer firstLabel = null;
         for (Integer label : labels.values()){
             if (firstLabel == null) 

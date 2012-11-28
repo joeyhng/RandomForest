@@ -10,8 +10,6 @@ public class Driver{
         
         int numFeatures = 685570;
         TreeMap<Integer,Integer> labels = new TreeMap<Integer,Integer>();
-//        ArrayList<Integer> idList = new ArrayList<Integer>();
-//        ArrayList<Integer> labelsList = new ArrayList<Integer>();
         ArrayList[] dataList = new ArrayList[numFeatures];
         for (int i=0; i<numFeatures; i++){
             dataList[i] = new ArrayList<Integer>();
@@ -22,9 +20,6 @@ public class Driver{
         while (fileScanner.hasNextLine()){
             String line = fileScanner.nextLine().replaceAll(":", " ");
             Scanner sc = new Scanner(line);
- //           int idx = idList.size();
- //           labelsList.add(sc.nextInt());
- //           idList.add(idx);
             int idx = labels.size();
             int lab = sc.nextInt();
             labels.put( idx, lab );
@@ -53,7 +48,7 @@ public class Driver{
         File file = new File(filename);
         Scanner fileScanner = new Scanner(file);
         while (fileScanner.hasNextLine()){
-            String line = fileScanner.nextLine();
+            String line = fileScanner.nextLine().replaceAll(":", " ");
             Scanner sc = new Scanner(line);
 
             int label = sc.nextInt();
@@ -85,9 +80,10 @@ public class Driver{
         System.err.println("start reading data");
         Data data = readData("input/train_Blanc__Mel.txt");
         System.err.println("finish reading data, start training random forest");
-        RandomForest rf = new RandomForest(10, 20);
+        RandomForest rf = new RandomForest(10, 50);
         rf.train(data);
         System.err.println("finish training data, now start testing");
+        //testRF("input/test_Blanc__Mel.txt", rf);
         testRF("input/test_Blanc__Mel.txt", rf);
     }
 
