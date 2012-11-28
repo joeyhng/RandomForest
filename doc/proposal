@@ -1,0 +1,30 @@
+In an era of data explosion, the amount of information is way beyond what a single human being can handle. In order to automate the process of understanding this gigantic amount of data, some learning methods are developed to let the machine understand and discover the patterns in the data for human. With the help of machine learning techniques, people could focus on the part of data that's interesting and energy could be saved by paying less attention to the normal, of less interest part of data, which could lead to discovering useful insights and better understanding of the data.
+
+Random forest, one of the most accurate classification algorithm, is currently widely used in a lot of applications. For example, at Amazon, the random forest algorithm is used to filter fraud transactions and stop potential frauds that could cause the company a lot of money. The advantages of random forest are:
+    It is one of the most accurate learning algorithms available. For many data sets, it produces a highly accurate classifier.
+    It runs efficiently on large data sets.
+    It can handle thousands of input variables without variable deletion.
+    It gives estimates of what variables are important in the classification.
+    It generates an internal unbiased estimate of the generalization error as the forest building progresses.
+    It has an effective method for estimating missing data and maintains accuracy when a large proportion of the data are missing.
+    It has methods for balancing error in class population unbalanced data sets.
+    Prototypes are computed that give information about the relation between the variables and the classification.
+    It computes proximities between pairs of cases that can be used in clustering, locating outliers, or (by scaling) give interesting views of the data.
+    The capabilities of the above can be extended to unlabeled data, leading to unsupervised clustering, data views and outlier detection.
+    It offers an experimental method for detecting variable interactions.
+
+Since orders should be processed as soon as possible to make the customers happy, it is required that the screening process take least amount of time possible. But, even with the help of the most advanced single computing machine, it is impossible to make the filtering process that Amazon does in limited time. This is where the high performance parallel computing comes into play. In order to parallelize it, we need to understand its algorithm first.
+
+Random forest (or random forests) is an ensemble classifier that consists of many decision trees and outputs the class that is the mode of the classes output by individual trees. The method combines Breiman's "bagging" idea and the random selection of features in order to construct a collection of decision trees with controlled variation. Each tree is constructed using the following algorithm:
+
+    Let the number of training cases be N, and the number of variables in the classifier be M.
+    We are told the number m of input variables to be used to determine the decision at a node of the tree; m should be much less than M.
+    Choose a training set for this tree by choosing n times with replacement from all N available training cases (i.e. take a bootstrap sample). Use the rest of the cases to estimate the error of the tree, by predicting their classes.
+    For each node of the tree, randomly choose m variables on which to base the decision at that node. Calculate the best split based on these m variables in the training set.
+    Each tree is fully grown and not pruned (as may be done in constructing a normal tree classifier).
+
+For prediction a new sample is pushed down the tree. It is assigned the label of the training sample in the terminal node it ends up in. This procedure is iterated over all trees in the ensemble, and the mode vote of all trees is reported as random forest prediction.
+
+In the training process, each decision tree in the forest is independent of each other. That yields a possibility for task-level parallelism. At each level in training the decision tree, it needs to find the best split, which requires one pass on the training data. This could yield loop parallelism. In prediction, since each tree is independent, the prediction process is inherently independent processes of prediction of each decision tree.
+
+Our intended approach is to apply MapReduce to increase the scalability and decrease the amount of running time for the algorithm. In the training process, we would like to divide the amount of work to workers in the way that each worker handles a subset of the training process of decision trees in the forest.

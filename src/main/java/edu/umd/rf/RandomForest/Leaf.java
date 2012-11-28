@@ -1,3 +1,5 @@
+package edu.umd.rf.RandomForest;
+
 import java.util.ArrayList;
 
 public class Leaf extends Node{

@@ -1,4 +1,8 @@
+package edu.umd.rf.RandomForest;
+
 import java.util.ArrayList;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 public class RandomForest{
 
