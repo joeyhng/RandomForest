@@ -6,9 +6,9 @@ import org.apache.commons.lang.StringEscapeUtils;
 
 public class RandomForest{
 
-    private int numTrees;
-    private int maxDepth;
-    private Tree[] trees;
+    protected int numTrees;
+    protected int maxDepth;
+    protected Tree[] trees;
 
     public RandomForest(int numTrees, int maxDepth){
         this.numTrees = numTrees;
@@ -35,6 +35,10 @@ public class RandomForest{
             assert res==0 || res==1;
         }
         return (c0 > c1) ? 0 : 1;
+    }
+    
+    public int getMaxDepth(){
+    	return maxDepth;
     }
 
     public void save(){

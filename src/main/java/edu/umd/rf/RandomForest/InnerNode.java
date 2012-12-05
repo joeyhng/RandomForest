@@ -1,5 +1,7 @@
 package edu.umd.rf.RandomForest;
 
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class InnerNode extends Node{
@@ -17,4 +19,14 @@ public class InnerNode extends Node{
     public int predict(ArrayList<Integer> a){
         return a.contains(new Integer(feat)) ? left.predict(a) : right.predict(a);
     }
+
+	@Override
+	public void writeTree(DataOutput out) throws IOException {
+		super.writeTree(out);
+		out.writeInt(this.feat);
+		left.writeTree(out);
+		right.writeTree(out);
+	}
+    
+    
 }

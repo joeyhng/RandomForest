@@ -6,10 +6,14 @@ import java.io.File;
 import java.util.Scanner;
 import java.io.IOException;
 
+
 public class Driver{
+	
+	public static final int NUMTREE = 50;
+	public static final int TREEDEPTH = 100;
+	public static final int NUMSPLIT = 10;
 
     public Data readData(String filename) throws IOException{
-        
         int numFeatures = 685570;
         TreeMap<Integer,Integer> labels = new TreeMap<Integer,Integer>();
         ArrayList[] dataList = new ArrayList[numFeatures];
@@ -32,15 +36,11 @@ public class Driver{
                 sc.next();
             }
         }
-
-//        int[] id = Data.toIntArray(idList);
-//        int[] labels = Data.toIntArray(labelsList);
         TreeMap<Integer, int[]> data = new TreeMap<Integer,int[]>();
         for (int i=0; i < numFeatures; i++){
             if (dataList[i].size() > 0)
                 data.put(new Integer(i), Data.toIntArray(dataList[i]));
         }
-//        return new Data(id, data, labels);
         return new Data(labels, data);
     }
 
@@ -78,18 +78,25 @@ public class Driver{
         System.out.printf("tp=%d, fp=%d, tn=%d, fn=%d\n", fp, fp, tn, fn);
     }
 
-    public void run() throws IOException{
+    public void run(String[] args) throws IOException{
         System.err.println("start reading data");
-        Data data = readData("input/train_Blanc__Mel.txt");
+        //Data data = readData("input/train_Blanc__Mel.txt");
+        Data data = readData(args[0] + "train_Blanc__Mel.txt");
         System.err.println("finish reading data, start training random forest");
-        RandomForest rf = new RandomForest(10, 50);
+        
+
+        long startTime = System.currentTimeMillis();
+        RandomForest rf = new RandomForestMR(NUMTREE, TREEDEPTH);
         rf.train(data);
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        System.out.println("Elapsed Time = " + elapsedTime / 1000.0);        
+        
         System.err.println("finish training data, now start testing");
-        //testRF("input/test_Blanc__Mel.txt", rf);
-        testRF("input/test_Blanc__Mel.txt", rf);
+        testRF(args[0]+"test_Blanc__Mel.txt", rf);
     }
 
     public static void main(String args[]) throws IOException{
-        (new Driver()).run();
+        (new Driver()).run(args);
     }
 }

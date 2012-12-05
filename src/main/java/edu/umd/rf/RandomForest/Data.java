@@ -1,12 +1,13 @@
 package edu.umd.rf.RandomForest;
 
+import java.io.Serializable;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class Data {
+public class Data implements Serializable{
 
     private int numExamples;
     private int numPositive;
