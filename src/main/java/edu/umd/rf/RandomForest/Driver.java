@@ -81,14 +81,14 @@ public class Driver{
 
     public void run(String[] args) throws IOException{
         System.err.println("start reading data");
-        Data data = readData(args[0] + "Blanc__Mel.txt");
+        Data data = readData(args[0] + "train_Blanc__Mel.txt");
         System.err.println("finish reading data, start training random forest");
         
 
         long startTime = System.currentTimeMillis();
-        //RandomForest rf = new RandomForestMR(NUMTREE, TREEDEPTH);
+        RandomForest rf = new RandomForestMR(NUMTREE, TREEDEPTH);
         //RandomForest rf = new RandomForest(NUMTREE, TREEDEPTH);
-        RandomForest rf = new RandomForest(1, 100);
+        //RandomForest rf = new RandomForest(1, 100);
         rf.train(data);
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
