@@ -1,10 +1,14 @@
 package edu.umd.rf.RandomForest;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -39,6 +43,9 @@ public class RandomForestMR extends RandomForest {
 			os.writeObject(data);
 			os.close();
 			fs.deleteOnExit(path);
+			
+			DistributedCache.addCacheFile(new URI("data#localdata"), conf);
+			DistributedCache.createSymlink(conf);
 
 			System.err.println("!!!!!!!!!!!!!!!!!!!!! finish writing data !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
@@ -79,6 +86,8 @@ public class RandomForestMR extends RandomForest {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
 		}
 
 		/*
@@ -97,7 +106,8 @@ public class RandomForestMR extends RandomForest {
 		protected void setup(Context context) throws IOException, InterruptedException {
 			if (data == null) {
 				FileSystem fs = FileSystem.get(context.getConfiguration());
-				ObjectInputStream input = new ObjectInputStream(fs.open(new Path("data")));
+				//ObjectInputStream input = new ObjectInputStream(fs.open(new Path("localdata")));
+				ObjectInputStream input = new ObjectInputStream(new FileInputStream("localdata"));
 				try {
 					data = (Data) input.readObject();
 				} catch (ClassNotFoundException e) {

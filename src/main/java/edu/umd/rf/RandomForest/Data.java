@@ -9,11 +9,13 @@ import java.util.TreeMap;
 
 public class Data implements Serializable{
 
-    private int numExamples;
-    private int numPositive;
+	private static final long serialVersionUID = 1779688994223706632L;
+	
+	protected int numExamples;
+	protected int numPositive;
 
-    private TreeMap<Integer, int[]> data;     // map (feature id) -> (list of example id)
-    private TreeMap<Integer, Integer> labels; // map (example id) -> (0/1 label)
+	protected TreeMap<Integer, int[]> data;     // map (feature id) -> (list of example id)
+	protected TreeMap<Integer, Integer> labels; // map (example id) -> (0/1 label)
 
     public Data(TreeMap<Integer,Integer> labels, TreeMap<Integer,int[]> data){
         this.data = data;
@@ -41,7 +43,8 @@ public class Data implements Serializable{
         return a;
     }
 
-    private double entropy(double x,double y){
+    @SuppressWarnings("unused")
+	private double entropy(double x,double y){
         double p = x / y;
         return -(p * Math.log(p) + (1-p) * Math.log(1-p));
     }
@@ -132,17 +135,7 @@ public class Data implements Serializable{
         int x = 0;
         for (Integer label : labels.values())
             x += label.intValue();
-        if (x>=0)
         return x==0 || x==labels.size();
-
-        Integer firstLabel = null;
-        for (Integer label : labels.values()){
-            if (firstLabel == null) 
-                firstLabel = label;
-            if (!label.equals(firstLabel))
-                return false;
-        }
-        return true;
     }
 
     public int getNumExamples(){

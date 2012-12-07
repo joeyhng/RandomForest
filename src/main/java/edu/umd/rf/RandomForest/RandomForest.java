@@ -2,8 +2,6 @@ package edu.umd.rf.RandomForest;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
 public class RandomForest{
 
     protected int numTrees;
@@ -41,7 +39,10 @@ public class RandomForest{
     	return maxDepth;
     }
 
-    public void save(){
+    public double size(){
+    	double x = 0;
+    	for (int i=0; i<trees.length; i++) x += trees[i].size();
+    	return x / trees.length;
     }
 
 }

@@ -9,14 +9,15 @@ import java.io.IOException;
 
 public class Driver{
 	
-	public static final int NUMTREE = 50;
-	public static final int TREEDEPTH = 100;
+	public static final int NUMTREE = 10;
+	public static final int TREEDEPTH = 20;
 	public static final int NUMSPLIT = 10;
 
     public Data readData(String filename) throws IOException{
         int numFeatures = 685570;
         TreeMap<Integer,Integer> labels = new TreeMap<Integer,Integer>();
-        ArrayList[] dataList = new ArrayList[numFeatures];
+        @SuppressWarnings("unchecked")
+		ArrayList<Integer>[] dataList = new ArrayList[numFeatures];
         for (int i=0; i<numFeatures; i++){
             dataList[i] = new ArrayList<Integer>();
         }
@@ -80,17 +81,21 @@ public class Driver{
 
     public void run(String[] args) throws IOException{
         System.err.println("start reading data");
-        //Data data = readData("input/train_Blanc__Mel.txt");
-        Data data = readData(args[0] + "train_Blanc__Mel.txt");
+        Data data = readData(args[0] + "Blanc__Mel.txt");
         System.err.println("finish reading data, start training random forest");
         
 
         long startTime = System.currentTimeMillis();
-        RandomForest rf = new RandomForestMR(NUMTREE, TREEDEPTH);
+        //RandomForest rf = new RandomForestMR(NUMTREE, TREEDEPTH);
+        //RandomForest rf = new RandomForest(NUMTREE, TREEDEPTH);
+        RandomForest rf = new RandomForest(1, 100);
         rf.train(data);
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
-        System.out.println("Elapsed Time = " + elapsedTime / 1000.0);        
+        System.out.println("Elapsed Time = " + elapsedTime / 1000.0);     
+        
+        System.out.println("max depth = " + TREEDEPTH);
+        System.out.println("average size of tree = " + rf.size());
         
         System.err.println("finish training data, now start testing");
         testRF(args[0]+"test_Blanc__Mel.txt", rf);

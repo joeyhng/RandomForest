@@ -27,6 +27,11 @@ public class Leaf extends Node{
 	public void writeTree(DataOutput out) throws IOException {
 		super.writeTree(out);
 		out.writeInt(majority);
-	}    
+	}
+
+	@Override
+	public int size() {
+		return 1;
+	}  
     
 }

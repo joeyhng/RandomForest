@@ -87,6 +87,10 @@ public class Tree implements Writable {
 			return new InnerNode(feat, left, right);
 		}
 	}
+	
+	public int size(){
+		return root.size();
+	}
 
 	public void readFields(DataInput in) throws IOException {
 		this.maxDepth = in.readInt();

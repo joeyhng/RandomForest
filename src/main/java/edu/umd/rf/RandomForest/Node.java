@@ -10,4 +10,6 @@ public abstract class Node{
     public void writeTree(DataOutput out) throws IOException{
    		out.writeBoolean(this instanceof Leaf);
     }
+
+	public abstract int size();
 }

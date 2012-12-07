@@ -27,6 +27,11 @@ public class InnerNode extends Node{
 		left.writeTree(out);
 		right.writeTree(out);
 	}
+
+	@Override
+	public int size() {
+		return left.size() + right.size() + 1;
+	}
     
     
 }
