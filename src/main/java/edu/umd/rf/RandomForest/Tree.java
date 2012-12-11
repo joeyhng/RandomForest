@@ -28,9 +28,6 @@ public class Tree implements Writable {
 	}
 
 	public void train(Data data) {
-		System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		System.err.println("!!!!!!!!!!!!!!!!!!!!! training random tree !!!!!!!!!!!!!!!!!!!!!!");
-		System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		this.root = train_helper(data, 0);
 	}
 

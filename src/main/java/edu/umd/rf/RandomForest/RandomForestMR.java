@@ -141,7 +141,7 @@ public class RandomForestMR extends RandomForest {
 	 * LongWritable, Tree>{
 	 * 
 	 * @Override protected void cleanup(Context context) throws IOException,
-	 * InterruptedException { // TODO Auto-generated method stub Path outFile =
+	 * InterruptedException { Path outFile =
 	 * new Path("reduce-out"); FileSystem fs =
 	 * FileSystem.get(context.getConfiguration()); SequenceFile.Writer writer =
 	 * SequenceFile.createWriter(fs, context.getConfiguration(), outFile,
