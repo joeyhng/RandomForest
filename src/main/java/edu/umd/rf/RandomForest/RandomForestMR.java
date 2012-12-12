@@ -173,6 +173,7 @@ public class RandomForestMR extends RandomForest {
 			// int numTrees = jobContext.getConfiguration().getInt("numTrees", 1);
 			int numSplits = Driver.NUMSPLIT;
 			int numTrees = Driver.NUMTREE;
+			System.out.println("Number of trees = " + numTrees);
 			List<InputSplit> splits = new ArrayList<InputSplit>();
 			int size = (numTrees + numSplits - 1) / numSplits;
 			for (int i = 0; i < numSplits; i++) {

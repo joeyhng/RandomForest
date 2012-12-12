@@ -9,9 +9,9 @@ import java.io.IOException;
 
 public class Driver{
 	
-	public static final int NUMTREE = 10;
-	public static final int TREEDEPTH = 20;
-	public static final int NUMSPLIT = 10;
+	public static final int NUMTREE = 20;
+	public static final int TREEDEPTH = 50;
+	public static final int NUMSPLIT = 1;
 
     public Data readData(String filename) throws IOException{
         int numFeatures = 685570;

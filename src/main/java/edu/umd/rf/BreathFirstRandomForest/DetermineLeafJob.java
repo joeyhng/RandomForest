@@ -4,10 +4,13 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Random;
 
 
 import org.apache.hadoop.conf.Configuration;
@@ -29,6 +32,8 @@ import edu.umd.rf.BreathFirstRandomForest.Models.ValueLabelPair;
 
 
 public class DetermineLeafJob {
+	
+	private static final int NUMFEATURES = 32;
 	/*
 	 *  determine leaf/feature and gather statistics
 	 *  give sufficient statistics for calculate splitting score for each node/feature pair
@@ -40,6 +45,23 @@ public class DetermineLeafJob {
 		DataOutputStream dos = new DataOutputStream(fs.create(new Path("tree")));
 		tree.write(dos);
 		dos.close();
+		
+		ArrayList<ArrayList<Integer>> usedFeatures = new ArrayList<ArrayList<Integer>>();
+		for (int i=0; i<tree.size(); i++){
+			ArrayList<Integer> f = new ArrayList<Integer>();
+			Random rand = new Random();
+			for (int j=0; j<8; j++)
+				f.add(rand.nextInt(NUMFEATURES));
+			usedFeatures.add(f);			
+		}
+		ObjectOutputStream oos = new ObjectOutputStream(fs.create(new Path("featureList")));
+		oos.writeObject(usedFeatures);
+		oos.close();
+		
+		ObjectInputStream ois = new ObjectInputStream(fs.open(new Path("featureList")));
+		usedFeatures = (ArrayList<ArrayList<Integer>>)ois.readObject();
+		ois.close();	
+
 		
 		System.out.println("before trying read tree");
 		DataInputStream dis = new DataInputStream(FileSystem.get(conf).open(new Path("tree")));
@@ -89,6 +111,7 @@ public class DetermineLeafJob {
 	public static class DetermineLeafMapper extends Mapper<IntWritable, Instance, NodeFeaturePair, ValueLabelPair> {
 
 		static private Tree tree = null;
+		static private ArrayList<ArrayList<Integer> > usedFeatures = null;
 
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException {
@@ -98,13 +121,24 @@ public class DetermineLeafJob {
 				tree.readFields(dis);
 				dis.close();
 			}
+			if (usedFeatures == null){
+				try {
+					ObjectInputStream ois = new ObjectInputStream(FileSystem.get(context.getConfiguration()).open(new Path("featureList")));
+					usedFeatures = (ArrayList<ArrayList<Integer>>)ois.readObject();
+					ois.close();	
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
 		@Override
 		protected void map(IntWritable key, Instance instance, Context context) throws IOException, InterruptedException {
 			// predict which Node 
 			int n = tree.predictNode(instance).getID(); // must be currently a leaf
-			for (int f = 0; f < instance.numFeatures(); f++) {
+			ArrayList<Integer> featList = usedFeatures.get(n);
+			for (int i=0; i<featList.size(); i++){
+				int f = featList.get(i).intValue();
 				context.write(new NodeFeaturePair(n, f), new ValueLabelPair(instance.get(f), instance.getLabel()));
 			}
 		}
@@ -133,6 +167,9 @@ public class DetermineLeafJob {
 				total[ (value.getLabel() == 1) ? 1 : 0] += 1;
 				valueList.add(new ValueLabelPair(value.getValue(), value.getLabel()));
 			}
+			
+			if (total[0]==0 || total[1]==0) // perfect training classification
+				return;
 	        			
 			Collections.sort(valueList, new Comparator<ValueLabelPair>(){
 				public int compare(ValueLabelPair p1, ValueLabelPair p2){
@@ -146,7 +183,6 @@ public class DetermineLeafJob {
 			int[] current = {0, 0};
 			for (int i = 0; i < valueList.size(); i++){
 				ValueLabelPair value = valueList.get(i);
-				splitValue +=  i==0 ? 0 : value.getValue() - valueList.get(i-1).getValue();
 				if (i > 0 && Math.abs(value.getValue() - valueList.get(i-1).getValue()) > 1e-8){
 					double score = computeScore(current, total);
 					if (splitScore == -1 || score < splitScore){
@@ -160,7 +196,7 @@ public class DetermineLeafJob {
 				current[ (value.getLabel() == 1) ? 1 : 0] += 1;
 			}
 			
-			if (splitScore != -1){ // if splitable by that feature
+			if (splitScore != -1){ // if splitable by that feature (not all feature has same value)
 				context.write(new IntWritable(key.getNodeID()), new SplitStatistics(key.getFeatureID(), splitValue, splitScore, leftLabel, rightLabel));
 			}
 		}

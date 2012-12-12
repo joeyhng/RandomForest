@@ -24,6 +24,7 @@ public class Tree implements Writable {
 	
 	private int maxDepth;
 	private Node root;
+	private int numFeatures;
 	
 	private ArrayList<Node> nodes; 
 	
@@ -75,6 +76,7 @@ public class Tree implements Writable {
 	public void train() throws Exception{
 		// 1. pre-process data to SequenceFile 
 		// 2. prepare root node
+		int lastSize = 0;
 		for (int nowDepth = 0; nowDepth < maxDepth; nowDepth++){
 			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			System.out.println("!!!!!!!!!!    depth "+ nowDepth +"  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -92,7 +94,6 @@ public class Tree implements Writable {
 			// next step: single Map : <(Node, feature, score)> -> <Node, best feature>			
 			FindBestSplitJob.run(conf, outputPath, new Path("out"), this);
 
-			// TODO: prune leaves?
 			// expand leaves
 			SequenceFile.Reader reader = new SequenceFile.Reader(fs, new Path("out/part-r-00000"), conf);
 			IntWritable nid = new IntWritable();
@@ -106,9 +107,12 @@ public class Tree implements Writable {
 				System.out.println("node list size = " + this.nodes.size());
 			}
 			System.out.println("size = " + size());
-			
 			fs.delete(outputPath, true);
 			fs.delete(new Path("out"), true);
+			
+			if (lastSize == size())
+				break;
+			lastSize = size();
 		}
 	}
 	

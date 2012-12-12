@@ -17,8 +17,15 @@ public class RandomForest{
     public void train(Data data){
         for (int i = 0; i < this.numTrees; i++){
             System.err.printf("training %dth tree\n", i);
+            long startTime = System.currentTimeMillis();
+            
             this.trees[i] = new Tree(maxDepth);
             this.trees[i].train(data);
+
+            long stopTime = System.currentTimeMillis();
+            long elapsedTime = stopTime - startTime;
+            System.out.println("--- Elapsed Time of tree " + i+ " = " + elapsedTime / 1000.0);     
+
         }
     }
 

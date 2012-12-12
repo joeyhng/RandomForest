@@ -16,7 +16,7 @@ public class Node implements Writable {
 	private int featureID;
 	private double splitValue;
 	
-	private int majorityLabel;
+	private int majorityLabel; 
 
 	private Node left;
 	private Node right;
@@ -90,7 +90,7 @@ public class Node implements Writable {
 		}
 		output.writeInt(featureID);
 		output.writeDouble(splitValue);
-		output.writeInt(majorityLabel);		
+		output.writeInt(majorityLabel);  
 	}
 
 	public void fillNodeList(ArrayList<Node> nodes) {

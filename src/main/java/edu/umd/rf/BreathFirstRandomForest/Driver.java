@@ -41,10 +41,12 @@ public class Driver {
 	            	try{
 	            		a.add( Double.parseDouble(s) );
 	            	} catch (NumberFormatException nfe){
-	            		if (s.equals("normal"))
-	            			label = 0;
-	            		if (s.equals("smurf"))
-	            			label = 1;
+	            		/*
+	            		if (s.equals("normal"))	label = 0;
+	            		if (s.equals("smurf")) label = 1;
+	            		*/
+	            		if (s.equals("g"))	label = 0;
+	            		if (s.equals("b")) label = 1;
 	            	}
 	            }
 	        	Instance instance = new Instance(label, Instance.toDoubleArray(a));
@@ -55,41 +57,39 @@ public class Driver {
 		}
 	}
 	
-	public void run(String args[]) throws Exception{
-		/*
-		ArrayList<ValueLabelPair> valueList = new ArrayList<ValueLabelPair>();
-		valueList.add(new ValueLabelPair(3, 1));
-		valueList.add(new ValueLabelPair(1, 0));
-		valueList.add(new ValueLabelPair(2, 0));
-		valueList.add(new ValueLabelPair(1, 1));
-		valueList.add(new ValueLabelPair(3, 1));
-		Collections.sort(valueList, new Comparator<ValueLabelPair>(){
-			public int compare(ValueLabelPair p1, ValueLabelPair p2){
-				return Double.compare(p1.getValue(), p2.getValue());
-			}
-		});
-		for (int i=0; i<valueList.size(); i++) 
-			System.out.printf("(%.3f,%d) ", valueList.get(i).getValue(), valueList.get(i).getLabel());
-		System.out.println();
-		*/
-		
-		Configuration conf = new Configuration();
-		prepareData(conf, args[0], new Path("data"));
-		RandomForest rf = new RandomForest(1, 1);
-		rf.train("data");
-		
-		// predict training data
-		SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(conf), new Path("data"), conf);
+	private void evaluation(RandomForest rf, Configuration conf, Path path) throws IOException{
+		SequenceFile.Reader reader = new SequenceFile.Reader(FileSystem.get(conf), path, conf);
 		Instance instance = new Instance();
 		IntWritable key = new IntWritable();
 		int correct = 0, total = 0;
+		int c0=0, c1=0;
 		while (reader.next(key, instance)){
 			int pred = rf.predict(instance);
+			if (pred==0) c0++;
+			if (pred==1) c1++;
 			correct += (pred == instance.getLabel()) ? 1 : 0;			
 			total++;
 		}
 		reader.close();
-		System.out.printf("training accuracy = %d/%d\n" , correct, total);
+		System.out.println(c0 + " " + c1);
+		System.out.printf("accuracy = %d/%d\n" , correct, total);
+
+	}
+	
+	public void run(String args[]) throws Exception{
+
+		String trainPath = "/classhomes/cs71407/rf/data/train_ionosphere.data";
+		String testPath = "/classhomes/cs71407/rf/data/test_ionosphere.data";
+		
+		Configuration conf = new Configuration();
+		prepareData(conf, trainPath, new Path("data"));
+		RandomForest rf = new RandomForest(3, 20);
+		rf.train("data");
+		
+		// predict training data
+		prepareData(conf, testPath, new Path("testdata"));
+		evaluation(rf, conf, new Path("data"));
+		evaluation(rf, conf, new Path("testdata"));		
 	}
 	
 	public static void main(String args[]) throws Exception{
